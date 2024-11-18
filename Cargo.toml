@@ -1,0 +1,17 @@
+[package]
+name = "info-taulu"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+warp = "0.3.7"
+tokio = { version = "1.41.1", features = ["full"] }
+reqwest = {version = "0.12.9", features = ["json"]}
+tokio-cron-scheduler = "0.13.0"
+serde = { version = "1.0.215", features = ["derive"] }
+chrono = "0.4.38"
+askama = "0.12.1"
+futures-util = "0.3.31"
+tokio-stream = "0.1.16"
+dotenv = "0.15.0"
+openssl = { version = "0.10", features = ["vendored"] }
