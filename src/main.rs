@@ -17,6 +17,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     dotenv::dotenv().ok();
 
     let api_key = env::var("API_KEY").expect("Missing API_KEY in .env file");
+    let static_dir = env::var("STATIC_DIR").expect("Missing STATIC_DIR in .env file");
 
     let client = create_client(api_key).await?;
     let state = Arc::new(RwLock::new(State::default()));
@@ -33,8 +34,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
         },
     );
 
-    let index = warp::path::end().and(warp::fs::file("static/index.html"));
-    let static_dir = warp::path("static").and(warp::fs::dir("static"));
+    let index = warp::path::end().and(warp::fs::file(format!("{static_dir}/index.html")));
+    let static_dir = warp::path("static").and(warp::fs::dir(static_dir));
 
     let routes = index.or(connect).or(static_dir);
 
