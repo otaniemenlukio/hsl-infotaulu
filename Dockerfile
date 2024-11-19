@@ -26,6 +26,7 @@ RUN cargo build --target=x86_64-unknown-linux-musl --release
 FROM rust:latest
 
 EXPOSE 3060
+ENV TZ="Europe/Helsinki"
 
 COPY --from=build /frontend/target/x86_64-unknown-linux-musl/release/info-taulu .
 COPY --from=build /frontend/src /frontend/src
