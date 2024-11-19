@@ -11,7 +11,10 @@
     <div class="data">
         <div class="hsl-screen tram">
             <div class="header">
-                <h1>Aalto-yliopisto (M)</h1>
+                <span>
+                    <img src="/static/tram.svg" />
+                    <h1>Aalto-yliopisto (M)</h1>
+                </span>
                 <h1>Lähtee</h1>
             </div>
             {% for stop in tram %}
@@ -42,7 +45,10 @@
     <div class="data">
         <div class="hsl-screen metro">
             <div class="header">
-                <h1>Aalto-yliopiston metroasema</h1>
+                <span>
+                    <img src="/static/metro.svg" />
+                    <h1>Aalto-yliopiston metroasema</h1>
+                </span>
                 <h1>Lähtee</h1>
             </div>
             {% for stop in metro %}
@@ -69,32 +75,70 @@
     </div>
 </div>
 <div class="right">
-    <div class="data">
-        <div class="hsl-screen bus">
-            <div class="header">
-                <h1>Aalto-yliopisto (M)</h1>
-                <h1>Lähtee</h1>
-            </div>
-            {% for stop in bus %}
-            <div class="slot {{ stop.in_time_window }} ">
-                    <div class="s-left">
-                        <h1>{{ stop.full_name }}</h1>
-                    </div>
-                    <div class="s-right">
-                        <div class="r-left">
-                            <h3>{{ stop.relative_departure }}</h3>
-                        </div>
-                        <div class="r-right">
-                            {% if stop._inner.arrival_delay > 30 %}
-                                <h2 class="late">~ {{ stop.scheduled_arrival}}</h2>
-                                <p>~ {{ stop.realtime_departure }}</p>
-                            {% else %}
-                                <h2>~ {{ stop.realtime_departure }}</h2>
-                            {% endif %}
-                        </div>
-                    </div>
+    <div class="top">
+        <div class="data">
+            <div class="hsl-screen bus">
+                <div class="header">
+                    <span>
+                        <img src="/static/bus.svg" />
+                        <h1>Aalto-yliopisto (M)</h1>
+                    </span>
+                    <h1>Lähtee</h1>
                 </div>
-            {% endfor %}
+                {% for stop in bus %}
+                <div class="slot {{ stop.in_time_window }} ">
+                        <div class="s-left">
+                            <h1>{{ stop.full_name }}</h1>
+                        </div>
+                        <div class="s-right">
+                            <div class="r-left">
+                                <h3>{{ stop.relative_departure }}</h3>
+                            </div>
+                            <div class="r-right">
+                                {% if stop._inner.arrival_delay > 30 %}
+                                    <h2 class="late">~ {{ stop.scheduled_arrival}}</h2>
+                                    <p>~ {{ stop.realtime_departure }}</p>
+                                {% else %}
+                                    <h2>~ {{ stop.realtime_departure }}</h2>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    <div class="bottom">
+        <div class="data">
+            <div class="hsl-screen bus">
+                <div class="header">
+                    <span>
+                        <img src="/static/bus.svg" />
+                        <h1>Hagalundinsilta</h1>
+                    </span>
+                    <h1>Lähtee</h1>
+                </div>
+                {% for stop in bus2 %}
+                <div class="slot {{ stop.in_time_window }} ">
+                        <div class="s-left">
+                            <h1>{{ stop.full_name }}</h1>
+                        </div>
+                        <div class="s-right">
+                            <div class="r-left">
+                                <h3>{{ stop.relative_departure }}</h3>
+                            </div>
+                            <div class="r-right">
+                                {% if stop._inner.arrival_delay > 30 %}
+                                    <h2 class="late">~ {{ stop.scheduled_arrival}}</h2>
+                                    <p>~ {{ stop.realtime_departure }}</p>
+                                {% else %}
+                                    <h2>~ {{ stop.realtime_departure }}</h2>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
         </div>
     </div>
 </div>

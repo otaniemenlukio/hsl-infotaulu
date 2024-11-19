@@ -126,6 +126,29 @@ nav .h-right {
     right: 0;
 }
 
+.top {
+    position: absolute;
+    height: 50%;
+    width: 100%;
+    top: 0;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.bottom {
+    position: absolute;
+    height: 50%;
+    width: 100%;
+    bottom: 0;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
 
 .data {
     width: calc(100% - 10px);
@@ -134,8 +157,8 @@ nav .h-right {
 }
 
 .hsl-screen {
-    width: calc(100% - 10px);
-    height: calc(100% - 10px);
+    width: calc(100% - 15px);
+    height: calc(100% - 15px);
     padding: 5px;
 
     background-color: var(--hsl-main);
@@ -147,16 +170,16 @@ nav .h-right {
 }
 
 .hsl-screen.metro {
-    border-left: solid 3px var(--hsl-metro);
+    border-left: solid 6px var(--hsl-metro);
 }
 
 
 .hsl-screen.tram {
-    border-left: solid 3px var(--hsl-tram);
+    border-left: solid 6px var(--hsl-tram);
 }
 
 .hsl-screen.bus {
-    border-left: solid 3px var(--hsl-bus);
+    border-left: solid 6px var(--hsl-bus);
 }
 
 .hsl-screen .header {
@@ -174,9 +197,19 @@ nav .h-right {
     border-bottom: solid 1px var(--hsl-white);
 }
 
-.hsl-screen .header h1 {
-    margin-bottom: 10px;
+.hsl-screen .header span {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
 }
+
+.hsl-screen img {
+    width: 35px;
+    height: 35px;
+    margin: 5px;
+    margin-right: 10px;
+}
+
 
 .hsl-screen .slot {
     width: calc(100% - 10px);

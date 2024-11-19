@@ -21,6 +21,7 @@ pub struct HslResponse {
 pub struct HslResponseData {
     pub stations: Vec<Station>,
     pub bus: Vec<Stop>,
+    pub bus2: Vec<Stop>,
     pub tram: Vec<Stop>,
 }
 
@@ -143,9 +144,11 @@ impl From<(&StopTime, &Vec<Stop>)> for FormattedStopTime {
         let realtime_departure = Self::time_to_string(stop_time.realtime_departure);
         let headsign = stop_time.headsign.clone();
 
-        let destination = stop_time
+        let mut destination = stop_time
             .headsign
             .split(" ")
+            .map(|l| l.split("-"))
+            .flatten()
             .nth(0)
             .expect("Expected valid headsign");
         let routes = stops.iter().fold(vec![], |mut a, v| {
@@ -153,6 +156,10 @@ impl From<(&StopTime, &Vec<Stop>)> for FormattedStopTime {
             a.append(&mut routes);
             a
         });
+
+        if destination == "Westendinas." {
+            destination = "Westendinasema"; // Fuck it
+        }
 
         let route = routes
             .iter()
@@ -202,6 +209,7 @@ pub struct HslResult {
     pub metro: Vec<FormattedStopTime>,
     pub tram: Vec<FormattedStopTime>,
     pub bus: Vec<FormattedStopTime>,
+    pub bus2: Vec<FormattedStopTime>,
 }
 
 impl Into<String> for TimeFormat {
@@ -241,7 +249,7 @@ pub async fn fetch_data(client: ApiClient) -> Result<HslResult, Box<dyn Error>> 
 
     let graphql = r#"
         {
-        "query": "{\tstations(ids: \"HSL:2000102\") { name stops { gtfsId name code platformCode, routes { longName, shortName }, stoptimesWithoutPatterns { scheduledArrival realtimeArrival arrivalDelay scheduledDeparture realtimeDeparture departureDelay realtime serviceDay headsign } } } bus: stops(ids: [\"HSL:2222234\", \"HSL:2222212\"]) { gtfsId name code platformCode, routes { longName, shortName }, stoptimesWithoutPatterns { scheduledArrival realtimeArrival arrivalDelay scheduledDeparture realtimeDeparture departureDelay realtime serviceDay headsign } }, tram: stops(ids: [\"HSL:2222405\", \"HSL:2222406\"]) { gtfsId name code platformCode, routes { longName, shortName }, stoptimesWithoutPatterns { scheduledArrival realtimeArrival arrivalDelay scheduledDeparture realtimeDeparture departureDelay realtime serviceDay headsign } }}"
+        "query": "{\tstations(ids: \"HSL:2000102\") { name stops { gtfsId name code platformCode, routes { longName, shortName }, stoptimesWithoutPatterns { scheduledArrival realtimeArrival arrivalDelay scheduledDeparture realtimeDeparture departureDelay realtime serviceDay headsign } } } bus: stops(ids: [\"HSL:2222234\", \"HSL:2222212\"]) { gtfsId name code platformCode, routes { longName, shortName }, stoptimesWithoutPatterns { scheduledArrival realtimeArrival arrivalDelay scheduledDeparture realtimeDeparture departureDelay realtime serviceDay headsign } }, bus2: stops(ids: [\"HSL:2213270\", \"HSL:2213271\"]) { gtfsId name code platformCode, routes { longName, shortName }, stoptimesWithoutPatterns { scheduledArrival realtimeArrival arrivalDelay scheduledDeparture realtimeDeparture departureDelay realtime serviceDay headsign } }, tram: stops(ids: [\"HSL:2222405\", \"HSL:2222406\"]) { gtfsId name code platformCode, routes { longName, shortName }, stoptimesWithoutPatterns { scheduledArrival realtimeArrival arrivalDelay scheduledDeparture realtimeDeparture departureDelay realtime serviceDay headsign } }}"
         }
     "#;
 
@@ -260,6 +268,7 @@ pub async fn fetch_data(client: ApiClient) -> Result<HslResult, Box<dyn Error>> 
 
     let mut metro = vec![];
     let mut bus = vec![];
+    let mut bus2 = vec![];
     let mut tram = vec![];
 
     if let Some(station) = body.data.stations.iter().nth(0) {
@@ -280,6 +289,14 @@ pub async fn fetch_data(client: ApiClient) -> Result<HslResult, Box<dyn Error>> 
         });
     });
 
+    let stops = &body.data.bus2;
+    stops.iter().for_each(|stop| {
+        stop.stoptimes_without_patterns.iter().for_each(|st| {
+            let fst = FormattedStopTime::from((st, stops));
+            bus2.push(fst);
+        });
+    });
+
     let stops = &body.data.tram;
     stops.iter().for_each(|stop| {
         stop.stoptimes_without_patterns.iter().for_each(|st| {
@@ -290,9 +307,15 @@ pub async fn fetch_data(client: ApiClient) -> Result<HslResult, Box<dyn Error>> 
 
     metro.sort_by(|a, b| a._inner.realtime_arrival.cmp(&b._inner.realtime_arrival));
     bus.sort_by(|a, b| a._inner.realtime_arrival.cmp(&b._inner.realtime_arrival));
+    bus2.sort_by(|a, b| a._inner.realtime_arrival.cmp(&b._inner.realtime_arrival));
     tram.sort_by(|a, b| a._inner.realtime_arrival.cmp(&b._inner.realtime_arrival));
 
-    Ok(HslResult { metro, bus, tram })
+    Ok(HslResult {
+        metro,
+        bus,
+        bus2,
+        tram,
+    })
 }
 
 pub async fn update_state(
