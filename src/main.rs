@@ -41,6 +41,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     println!("> Started server on localhost:3060");
 
-    warp::serve(routes).run(([127, 0, 0, 1], 3060)).await;
+    warp::serve(routes).run(([0, 0, 0, 0], 3060)).await;
     Ok(())
 }
