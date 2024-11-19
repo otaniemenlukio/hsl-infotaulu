@@ -2,7 +2,7 @@
 let pingCount = 0;
 
 const connect = () => {
-    const uri = 'ws://' + location.host + '/connect';
+    const uri = 'wss://' + location.host + '/connect';
     const ws = new WebSocket(uri);
     console.log(`> Connected to ${uri}`);
     connected = true;
