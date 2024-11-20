@@ -18,7 +18,7 @@
 
 3. Jos olet tehnyt lähdekoodin muutoksia, rakenna kontti uudelleen komennolla `docker build . -t hsl`
 
-4. Käynnistä palvelin komennolla `docker run --rm -it --mount -p 3060:3060 type=bind,src="<polku .env kansioon>",target=/.env`
+4. Käynnistä palvelin komennolla `docker run --rm -it --mount -p 3060:3060 type=bind,src="<polku .env kansioon>",target=/.env hsl`
 
 5. Infotaulu on nyt näkyvissä lokaalisti osoitteessa `localhost:3060`
 
