@@ -14,4 +14,4 @@ askama = "0.12.1"
 futures-util = "0.3.31"
 tokio-stream = "0.1.16"
 dotenv = "0.15.0"
-# openssl = { version = "0.10", features = ["vendored"] }
+openssl = { version = "0.10", features = ["vendored"] }
