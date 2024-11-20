@@ -140,9 +140,9 @@ nav .h-right {
 
 .bottom {
     position: absolute;
-    height: 50%;
+    height: calc(50% + 5px);
     width: 100%;
-    bottom: 0;
+    top: calc(50% - 5px);
 
     display: flex;
     flex-direction: column;
