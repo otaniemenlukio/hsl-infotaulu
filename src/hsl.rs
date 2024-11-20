@@ -131,8 +131,10 @@ impl FormattedStopTime {
     }
 }
 
-impl From<(&StopTime, &Vec<Stop>)> for FormattedStopTime {
-    fn from(value: (&StopTime, &Vec<Stop>)) -> Self {
+impl TryFrom<(&StopTime, &Vec<Stop>)> for FormattedStopTime {
+    type Error = Box<dyn Error>;
+
+    fn try_from(value: (&StopTime, &Vec<Stop>)) -> Result<Self, Self::Error> {
         let (stop_time, stops) = value;
 
         let _inner = stop_time.clone();
@@ -150,7 +152,7 @@ impl From<(&StopTime, &Vec<Stop>)> for FormattedStopTime {
             .map(|l| l.split("-"))
             .flatten()
             .nth(0)
-            .expect("Expected valid headsign");
+            .ok_or(headsign.clone())?;
         let routes = stops.iter().fold(vec![], |mut a, v| {
             let mut routes = v.routes.clone();
             a.append(&mut routes);
@@ -170,7 +172,7 @@ impl From<(&StopTime, &Vec<Stop>)> for FormattedStopTime {
                     None
                 }
             })
-            .expect("Route should contain headsing");
+            .ok_or(headsign.clone())?;
 
         let full_name = format!("{} {}", route.short_name, headsign);
         let short_name = route.short_name.clone();
@@ -181,7 +183,7 @@ impl From<(&StopTime, &Vec<Stop>)> for FormattedStopTime {
         let rel_arrival = Self::time_to_string(stop_time.realtime_arrival - seconds);
         let rel_departure = Self::time_to_string(stop_time.realtime_departure - seconds);
 
-        Self {
+        Ok(Self {
             _inner,
             scheduled_arrival: schedules_arrival,
             realtime_arrival,
@@ -193,7 +195,7 @@ impl From<(&StopTime, &Vec<Stop>)> for FormattedStopTime {
             relative_departure: rel_departure,
             relative_arrival: rel_arrival,
             in_time_window: true,
-        }
+        })
     }
 }
 
@@ -273,37 +275,37 @@ pub async fn fetch_data(client: ApiClient) -> Result<HslResult, Box<dyn Error>> 
 
     if let Some(station) = body.data.stations.iter().nth(0) {
         let stops = &station.stops;
-        stops.iter().for_each(|stop| {
-            stop.stoptimes_without_patterns.iter().for_each(|st| {
-                let fst = FormattedStopTime::from((st, stops));
+        for stop in stops.iter() {
+            for st in stop.stoptimes_without_patterns.iter() {
+                let fst = FormattedStopTime::try_from((st, stops))?;
                 metro.push(fst);
-            });
-        });
+            }
+        }
     }
 
     let stops = &body.data.bus;
-    stops.iter().for_each(|stop| {
-        stop.stoptimes_without_patterns.iter().for_each(|st| {
-            let fst = FormattedStopTime::from((st, stops));
+    for stop in stops.iter() {
+        for st in stop.stoptimes_without_patterns.iter() {
+            let fst = FormattedStopTime::try_from((st, stops))?;
             bus.push(fst);
-        });
-    });
+        }
+    }
 
     let stops = &body.data.bus2;
-    stops.iter().for_each(|stop| {
-        stop.stoptimes_without_patterns.iter().for_each(|st| {
-            let fst = FormattedStopTime::from((st, stops));
+    for stop in stops.iter() {
+        for st in stop.stoptimes_without_patterns.iter() {
+            let fst = FormattedStopTime::try_from((st, stops))?;
             bus2.push(fst);
-        });
-    });
+        }
+    }
 
     let stops = &body.data.tram;
-    stops.iter().for_each(|stop| {
-        stop.stoptimes_without_patterns.iter().for_each(|st| {
-            let fst = FormattedStopTime::from((st, stops));
+    for stop in stops.iter() {
+        for st in stop.stoptimes_without_patterns.iter() {
+            let fst = FormattedStopTime::try_from((st, stops))?;
             tram.push(fst);
-        });
-    });
+        }
+    }
 
     metro.sort_by(|a, b| a._inner.realtime_arrival.cmp(&b._inner.realtime_arrival));
     bus.sort_by(|a, b| a._inner.realtime_arrival.cmp(&b._inner.realtime_arrival));

@@ -2,10 +2,9 @@
 let pingCount = 0;
 
 const connect = () => {
-    const uri = 'wss://' + location.host + '/connect';
+    const uri = location.host.includes('localhost') ? 'ws://' + location.host + '/connect' : 'wss://' + location.host + '/connect';
     const ws = new WebSocket(uri);
     console.log(`> Connected to ${uri}`);
-    connected = true;
 
     setInterval(() => {
         if (pingCount >= 5) {

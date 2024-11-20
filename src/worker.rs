@@ -33,7 +33,7 @@ pub async fn runtime(
             let c_ref = _client.clone();
             Box::pin(async move {
                 if let Err(e) = update_state(s_ref, c_ref).await {
-                    println!("Failed to update state: {e}");
+                    eprintln!("> Failed to update state: {e}");
                 }
             })
         })?)
@@ -45,7 +45,9 @@ pub async fn runtime(
             let s_ref = _state.clone();
             let l_ref = lobby.clone();
             Box::pin(async move {
-                ws::handle_lobby(s_ref, l_ref).await;
+                if let Err(e) = ws::handle_lobby(s_ref, l_ref).await {
+                    eprintln!("> Failed handle lobby: {e}");
+                }
             })
         })?)
         .await?;

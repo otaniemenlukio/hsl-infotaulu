@@ -29,7 +29,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     let connect = warp::path("connect").and(warp::ws()).and(lobby).map(
         |ws: warp::ws::Ws, lobby: Arc<WebsocketLobby>| {
-            // This will call our function if the handshake succeeds.
             ws.on_upgrade(move |socket| lobby.on_connect(socket))
         },
     );

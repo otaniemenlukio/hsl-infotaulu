@@ -1,5 +1,6 @@
 use std::{
     collections::HashMap,
+    error::Error,
     sync::{
         atomic::{AtomicUsize, Ordering},
         Arc,
@@ -33,7 +34,7 @@ impl WebsocketLobby {
                 user_ws_tx
                     .send(message)
                     .unwrap_or_else(|e| {
-                        eprintln!("websocket send error: {}", e);
+                        eprintln!("> websocket send error: {}", e);
                     })
                     .await;
             }
@@ -47,7 +48,7 @@ impl WebsocketLobby {
             match result {
                 Ok(_) => {}
                 Err(e) => {
-                    eprintln!("websocket error(uid={}): {}", id, e);
+                    eprintln!("> websocket error(uid={}): {}", id, e);
                     break;
                 }
             };
@@ -60,24 +61,32 @@ impl WebsocketLobby {
         self.connections.write().await.remove(&id);
     }
 
-    pub async fn broadcast(self: Arc<Self>, msg: Message) {
+    pub async fn broadcast(self: Arc<Self>, msg: Message) -> Result<(), Box<dyn Error>> {
         let r_lock = self.connections.read().await;
         if r_lock.len() <= 0 {
-            return;
+            return Ok(());
         }
 
-        for (id, conn) in r_lock.iter() {
-            conn.send(msg.clone())
-                .expect(&format!("Failed to send message to connection (id={id})"));
+        for (_id, conn) in r_lock.iter() {
+            if let Err(e) = conn.send(msg.clone()) {
+                eprintln!("> Failed to send update to connection: {e}");
+            }
         }
+
+        Ok(())
     }
 }
 
-pub async fn handle_lobby(state: Arc<RwLock<State>>, lobby: Arc<WebsocketLobby>) {
+pub async fn handle_lobby(
+    state: Arc<RwLock<State>>,
+    lobby: Arc<WebsocketLobby>,
+) -> Result<(), Box<dyn Error>> {
     let r_lock = state.read().await;
     let template = Page::new(&r_lock);
-    let html = template.render().expect("Failed to render template");
+    let html = template.render()?;
     drop(r_lock);
 
-    lobby.broadcast(Message::text(html)).await;
+    lobby.broadcast(Message::text(html)).await?;
+
+    Ok(())
 }
